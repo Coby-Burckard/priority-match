@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "postgresql"
     // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
     // Further reading:
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
@@ -55,6 +55,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    Schedule      Schedule[]
 }
 
 model VerificationToken {
@@ -63,4 +64,37 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+// Business logic for app
+
+model Schedule {
+    id Int @id @default(autoincrement())
+    title String @unique
+    interviews Site[]
+    userId String
+    users User @relation(fields: [userId], references: [id])
+}
+
+model SiteCharacteristic {
+    id Int @id @default(autoincrement())
+    weight Decimal
+    characteristicScores CharacteristicScore[]
+}
+
+model Site {
+    id Int @id @default(autoincrement())
+    dates DateTime[]
+    scheduleId Int
+    schedule Schedule @relation(fields: [scheduleId], references: [id])
+    characteristicScores CharacteristicScore[]
+}   
+
+model CharacteristicScore {
+    id Int @id @default(autoincrement())
+    score Decimal
+    siteId Int
+    site Site @relation(fields: [siteId], references: [id])
+    siteCharacteristicId Int
+    siteCharacteristic SiteCharacteristic @relation(fields: [siteCharacteristicId], references: [id])
 }
